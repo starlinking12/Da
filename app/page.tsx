@@ -122,20 +122,38 @@ const Navbar = () => {
   );
 };
 
-const ServiceCard = ({ icon: Icon, title, desc, delay }: { icon: any, title: string, desc: string, delay: number }) => (
+const ServiceCard = ({ icon: Icon, title, desc, delay, image }: { icon: any, title: string, desc: string, delay: number, image: string }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay, duration: 0.6 }}
-    whileHover={{ y: -5 }}
-    className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-gold/30 transition-all duration-500"
+    whileHover={{ y: -10 }}
+    className="group rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-gold/30 transition-all duration-500 overflow-hidden flex flex-col h-full"
   >
-    <div className="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center mb-6 text-gold group-hover:scale-110 group-hover:bg-gold group-hover:text-rich-black transition-all duration-500">
-      <Icon size={32} strokeWidth={1.5} />
+    {/* Image Header */}
+    <div className="relative h-56 w-full overflow-hidden">
+      <Image 
+        src={image} 
+        alt={title} 
+        fill 
+        className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+        referrerPolicy="no-referrer"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 to-transparent" />
+      <div className="absolute bottom-4 left-6 w-12 h-12 rounded-xl bg-gold text-rich-black flex items-center justify-center shadow-2xl">
+        <Icon size={24} strokeWidth={2} />
+      </div>
     </div>
-    <h3 className="text-xl font-display font-bold mb-3 text-white group-hover:text-gold transition-colors">{title}</h3>
-    <p className="text-white/60 text-sm leading-relaxed">{desc}</p>
+
+    {/* Content */}
+    <div className="p-8 flex-grow flex flex-col">
+      <h3 className="text-xl font-display font-bold mb-3 text-white group-hover:text-gold transition-colors">{title}</h3>
+      <p className="text-white/50 text-sm leading-relaxed mb-6">{desc}</p>
+      <div className="mt-auto pt-4 border-t border-white/5">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold opacity-0 group-hover:opacity-100 transition-opacity">Expert Level Service</span>
+      </div>
+    </div>
   </motion.div>
 );
 
@@ -145,19 +163,54 @@ const GalleryItem = ({ src, alt, title, subtitle, delay }: { src: string, alt: s
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
     transition={{ delay, duration: 0.8 }}
+    whileHover="hover"
     className="relative aspect-video group overflow-hidden rounded-2xl cursor-pointer"
   >
-    <Image 
-      src={src} 
-      alt={alt} 
-      fill 
-      className="object-cover transition-transform duration-1000 group-hover:scale-110" 
-      referrerPolicy="no-referrer"
-    />
-    <div className="absolute inset-0 bg-gradient-to-t from-rich-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
-      <h4 className="text-gold font-display font-bold text-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{title}</h4>
-      <p className="text-white/70 text-sm translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">{subtitle}</p>
-    </div>
+    <motion.div 
+      variants={{
+        hover: { scale: 1.05 }
+      }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="absolute inset-0"
+    >
+      <Image 
+        src={src} 
+        alt={alt} 
+        fill 
+        className="object-cover" 
+        referrerPolicy="no-referrer"
+      />
+    </motion.div>
+
+    <motion.div 
+      variants={{
+        hover: { opacity: 1 }
+      }}
+      initial={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="absolute inset-0 bg-gradient-to-t from-rich-black via-transparent to-transparent flex flex-col justify-end p-8"
+    >
+      <motion.h4 
+        variants={{
+          hover: { y: 0, opacity: 1 }
+        }}
+        initial={{ y: 20, opacity: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="text-gold font-display font-bold text-lg"
+      >
+        {title}
+      </motion.h4>
+      <motion.p 
+        variants={{
+          hover: { y: 0, opacity: 1 }
+        }}
+        initial={{ y: 20, opacity: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+        className="text-white/70 text-sm"
+      >
+        {subtitle}
+      </motion.p>
+    </motion.div>
   </motion.div>
 );
 
@@ -309,36 +362,42 @@ export default function HomePage() {
               title="Auto Body & Collision" 
               desc="Structural repair and panel replacement using precision frame alignment technology." 
               delay={0.1}
+              image="https://images.unsplash.com/photo-1486001976380-703aed69ed7a?q=80&w=2000&auto=format&fit=crop"
             />
             <ServiceCard 
               icon={PaintRoller} 
               title="Paint & Respray" 
               desc="Computerized color matching and premium clear coats for a flawless factory-correct finish." 
               delay={0.2}
+              image="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop"
             />
             <ServiceCard 
               icon={Wrench} 
               title="Dent Correction" 
               desc="Specialized paintless dent repair (PDR) that preserves your original paint finish." 
               delay={0.3}
+              image="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop"
             />
             <ServiceCard 
               icon={Stethoscope} 
               title="Full Diagnostics" 
               desc="Deep system scans and engine health check for Toyota, Lexus, and all major brands." 
               delay={0.4}
+              image="https://images.unsplash.com/photo-1615906655593-ad0313b52adb?q=80&w=2000&auto=format&fit=crop"
             />
             <ServiceCard 
               icon={Ship} 
               title="Global Export" 
               desc="Logistics and sales support for shipping high-end vehicles across North America and overseas." 
               delay={0.5}
+              image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
             />
             <ServiceCard 
               icon={Sparkle} 
               title="Elite Detailing" 
               desc="Multi-stage paint correction, ceramic coating protection, and deep interior sterilization." 
               delay={0.6}
+              image="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop"
             />
           </div>
         </div>
@@ -384,13 +443,105 @@ export default function HomePage() {
               subtitle="Detailing & Wax"
               delay={0.4}
             />
-            <div className="relative group overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-12 flex flex-col justify-center">
+            <motion.div 
+              whileHover={{ scale: 1.02, borderColor: 'rgba(196, 167, 71, 0.5)' }}
+              className="relative group overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-12 flex flex-col justify-center transition-colors duration-500"
+            >
               <h3 className="text-3xl font-display font-black text-white mb-6">See the transformation?</h3>
               <p className="text-white/50 mb-8 max-w-sm">Every project we take on is handled with absolute precision. Join our family of satisfied enthusiasts.</p>
               <a href="#contact" className="group text-gold font-bold flex items-center gap-2">
                 Get a Quote <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
               </a>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section id="about" className="py-32 relative overflow-hidden bg-white/5 border-y border-white/5">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="text-gold font-bold uppercase tracking-[0.4em] text-xs mb-6 block">The Legacy</span>
+              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter mb-8 italic text-white">
+                A DECADE OF <br />
+                <span className="text-white/20">PRECISION.</span>
+              </h2>
+              <div className="space-y-6 text-white/60 leading-relaxed font-medium">
+                <p>
+                  With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models. We specialize in Toyota, Lexus, Honda, and Nissan, but service all vehicles with the same precision and care.
+                </p>
+                <p>
+                  From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export - we do it all. Every car gets the royal treatment in our state-of-the-art facility.
+                </p>
+              </div>
+
+              {/* Brand Grid */}
+              <div className="mt-12 pt-12 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-8">
+                {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map((brand) => (
+                  <div key={brand} className="text-center">
+                    <span className="text-[10px] font-black tracking-[0.4em] text-white/30 hover:text-gold transition-colors block">{brand}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative aspect-[4/5] rounded-3xl overflow-hidden group"
+            >
+              <Image 
+                src="https://images.unsplash.com/photo-1530046339160-ce3e5b0c7a2f?q=80&w=2000&auto=format&fit=crop" 
+                alt="Expert Mechanics" 
+                fill 
+                className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-8 left-8 right-8 p-8 glass rounded-2xl">
+                <div className="flex items-center gap-6">
+                  <div className="text-4xl font-display font-black text-gold">10+</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 leading-tight">
+                    Years of <br /> Excellence
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-gold relative overflow-hidden">
+        <motion.div 
+          animate={{ x: [0, -100, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 opacity-10 flex items-center whitespace-nowrap text-[15vh] md:text-[20vh] font-display font-black italic pointer-events-none text-rich-black"
+        >
+          DAMIZ AUTO CARE • TOYOTA • LEXUS • HONDA • NISSAN • 
+        </motion.div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter text-rich-black leading-none mb-4">
+                NEED AUTO BODY <br /> REPAIR?
+              </h2>
+              <p className="text-rich-black/60 font-bold uppercase text-xs tracking-widest italic">Dents • Scratches • Paint • Collision • We fix it all</p>
             </div>
+            <a 
+              href="#contact" 
+              className="px-12 py-6 bg-rich-black text-gold font-black uppercase text-sm tracking-tighter hover:bg-white hover:text-rich-black transition-all shadow-2xl"
+            >
+              Get Free Estimate
+            </a>
           </div>
         </div>
       </section>
