@@ -1,120 +1,276 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
 import Image from 'next/image';
 import { 
   Car, 
   PaintRoller, 
   Wrench, 
-  ShieldCheck, 
   Stethoscope, 
   Ship, 
   Sparkle, 
-  Droplet,
-  Phone,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Menu,
-  X,
-  ChevronRight,
-  ArrowRight
+  Phone, 
+  Mail, 
+  MapPin, 
+  MessageCircle, 
+  Menu, 
+  X, 
+  ChevronRight, 
+  ArrowRight 
 } from 'lucide-react';
 
-// --- Components ---
+// --- Premium Animated Components ---
+
+const CountUp = ({ to, label }: { to: string, label: string }) => {
+  const [count, setCount] = useState(0);
+  const nodeRef = useRef(null);
+  const targetValue = parseInt(to.replace(/\D/g, ''));
+  const suffix = to.replace(/[0-9]/g, '');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          let startValue = 0;
+          const duration = 2000;
+          const startTime = performance.now();
+
+          const animate = (currentTime: number) => {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
+            // Ease out expo
+            const easedProgress = 1 - Math.pow(2, -10 * progress);
+            setCount(Math.floor(easedProgress * targetValue));
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+          requestAnimationFrame(animate);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (nodeRef.current) observer.observe(nodeRef.current);
+    return () => observer.disconnect();
+  }, [targetValue]);
+
+  return (
+    <div ref={nodeRef} className="text-center group">
+      <div className="text-4xl md:text-6xl font-display font-black text-gold mb-2 transition-transform duration-500 group-hover:scale-110">
+        {count}{suffix}
+      </div>
+      <div className="text-[10px] uppercase tracking-[0.4em] text-white/60 font-bold">{label}</div>
+    </div>
+  );
+};
+
+const TiltGalleryItem = ({ src, alt, title, subtitle, delay }: { src: string, alt: string, title: string, subtitle: string, delay: number }) => {
+  const x = useMotionValue(0.5);
+  const y = useMotionValue(0.5);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [0, 1], ["7deg", "-7deg"]);
+  const rotateY = useTransform(mouseXSpring, [0, 1], ["-7deg", "7deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width);
+    y.set((e.clientY - rect.top) / rect.height);
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 1, ease: "easeOut" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => { x.set(0.5); y.set(0.5); }}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      className="relative aspect-video group overflow-hidden rounded-3xl cursor-pointer bg-charcoal"
+    >
+      <motion.div className="absolute inset-0" style={{ transform: "translateZ(30px)" }}>
+        <Image 
+          src={src} 
+          alt={alt} 
+          fill 
+          className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+          referrerPolicy="no-referrer"
+        />
+      </motion.div>
+      <div className="absolute inset-0 bg-gradient-to-t from-rich-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col justify-end p-8">
+        <div style={{ transform: "translateZ(60px)" }}>
+          <h4 className="text-gold font-display font-bold text-xl mb-1">{title}</h4>
+          <p className="text-white/60 text-xs font-bold uppercase tracking-widest">{subtitle}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const AnimatedInput = ({ label, type = "text", placeholder, options }: { label: string, type?: string, placeholder?: string, options?: string[] }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [value, setValue] = useState("");
+
+  const inputId = label.toLowerCase().replace(/\s/g, '-');
+
+  return (
+    <div className="space-y-2 relative">
+      <label 
+        htmlFor={inputId}
+        className={`text-[10px] uppercase font-bold tracking-[0.2em] ml-1 transition-all duration-300 ${isFocused || value ? 'text-gold' : 'text-white/60'}`}
+      >
+        {label}
+      </label>
+      <div className="relative overflow-hidden rounded-xl">
+        {type === "select" ? (
+          <select 
+            id={inputId}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onChange={(e) => setValue(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium appearance-none cursor-pointer"
+          >
+            {options?.map(opt => <option key={opt} className="bg-charcoal text-white">{opt}</option>)}
+          </select>
+        ) : type === "textarea" ? (
+          <textarea 
+            id={inputId}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onChange={(e) => setValue(e.target.value)}
+            rows={4} 
+            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium resize-none" 
+            placeholder={placeholder} 
+          />
+        ) : (
+          <input 
+            id={inputId}
+            type={type}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onChange={(e) => setValue(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium" 
+            placeholder={placeholder} 
+          />
+        )}
+        <motion.div 
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: isFocused ? 1 : 0 }}
+          className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold origin-left z-10"
+        />
+      </div>
+    </div>
+  );
+};
+
+// --- Core UI Components ---
 
 const Preloader = () => (
   <motion.div
     initial={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    transition={{ duration: 0.8, ease: "easeInOut" }}
-    className="fixed inset-0 z-[9999] bg-rich-black flex items-center justify-center"
+    className="fixed inset-0 z-[100] bg-rich-black flex items-center justify-center"
   >
     <div className="text-center">
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="mb-4"
+        initial={{ y: 20, opacity: 0, letterSpacing: "1em" }}
+        animate={{ y: 0, opacity: 1, letterSpacing: "0.5em" }}
+        transition={{ duration: 1, ease: "circOut" }}
+        className="text-5xl font-display font-black text-gold mb-6"
       >
-        <span className="text-4xl font-display font-black tracking-tighter text-gold">DAMIZ</span>
+        DAMIZ
       </motion.div>
-      <motion.div 
-        className="w-48 h-[2px] bg-white/10 relative overflow-hidden"
-      >
+      <div className="w-48 h-[1px] bg-white/10 mx-auto relative overflow-hidden">
         <motion.div
-          animate={{ x: ["-100%", "100%"] }}
+          animate={{ left: ["-100%", "100%"] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-gold w-full"
+          className="absolute inset-0 bg-gold/50 w-full"
         />
-      </motion.div>
+      </div>
     </div>
   </motion.div>
 );
 
-const Navbar = () => {
+const Navbar = ({ onScrollTo }: { onScrollTo: (e: React.MouseEvent<HTMLAnchorElement>, id: string) => void }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinks = ['home', 'services', 'gallery', 'about', 'contact'];
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-rich-black/80 backdrop-blur-xl border-b border-white/5' : 'py-8 bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${scrolled ? 'py-4 bg-rich-black/70 backdrop-blur-2xl border-b border-white/5 shadow-2xl' : 'py-8 bg-transparent'}`}>
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#" className="flex flex-col group">
-          <span className="text-2xl font-display font-black tracking-tighter text-gold group-hover:text-white transition-colors">DAMIZ</span>
-          <span className="text-[10px] tracking-[0.3em] font-medium text-white/50 group-hover:text-gold transition-colors uppercase">Auto Care</span>
+        <a href="#" onClick={(e) => onScrollTo(e, 'home')} className="flex flex-col group relative z-[60]">
+          <span className="text-2xl font-display font-black tracking-tighter text-gold group-hover:text-white transition-colors duration-500">DAMIZ</span>
+          <span className="text-[10px] tracking-[0.3em] font-medium text-white/50 group-hover:text-gold transition-colors duration-500 uppercase">Auto Care</span>
         </a>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-10">
-          {['home', 'services', 'gallery', 'about', 'contact'].map((item) => (
+          {navLinks.map((item) => (
             <a 
               key={item} 
               href={`#${item}`} 
-              className="text-sm font-medium text-white/70 hover:text-gold transition-colors uppercase tracking-widest"
+              onClick={(e) => onScrollTo(e, item)}
+              className="text-[10px] font-bold text-white/50 hover:text-gold transition-all duration-300 uppercase tracking-[0.2em] relative group"
             >
               {item}
+              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gold transition-all duration-500 group-hover:w-full" />
             </a>
           ))}
           <a 
             href="#contact" 
-            className="px-6 py-2.5 bg-gold text-rich-black font-bold text-sm uppercase tracking-tighter hover:bg-white hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(196,167,71,0.3)]"
+            onClick={(e) => onScrollTo(e, 'contact')}
+            className="px-8 py-3 bg-gold text-rich-black font-black text-[10px] uppercase tracking-widest hover:bg-white hover:scale-105 transition-all duration-500 shadow-[0_10px_30px_rgba(196,167,71,0.2)]"
           >
-            Book Appointment
+            Get Estimate
           </a>
         </div>
 
-        {/* Mobile Toggle */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+        <button className="md:hidden text-gold z-[60] p-2" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-40 bg-rich-black flex flex-col items-center justify-center gap-8 md:hidden"
+            initial={{ y: "-100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 200 }}
+            className="fixed inset-0 bg-rich-black z-50 flex flex-col items-center justify-center gap-8 md:hidden p-6"
           >
-            {['home', 'services', 'gallery', 'about', 'contact'].map((item) => (
+            {navLinks.map((item) => (
               <a 
                 key={item} 
                 href={`#${item}`} 
-                onClick={() => setIsOpen(false)}
-                className="text-2xl font-display font-bold text-white hover:text-gold transition-colors uppercase"
+                onClick={(e) => { onScrollTo(e, item); setIsOpen(false); }}
+                className="text-4xl font-display font-black text-white hover:text-gold transition-colors uppercase italic tracking-tighter"
               >
                 {item}
               </a>
             ))}
+            <a 
+              href="#contact" 
+              onClick={(e) => { onScrollTo(e, 'contact'); setIsOpen(false); }}
+              className="mt-8 px-12 py-5 bg-gold text-rich-black font-black uppercase text-sm tracking-widest"
+            >
+              Book Now
+            </a>
           </motion.div>
         )}
       </AnimatePresence>
@@ -122,99 +278,7 @@ const Navbar = () => {
   );
 };
 
-const ServiceCard = ({ icon: Icon, title, desc, delay, image }: { icon: any, title: string, desc: string, delay: number, image: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ delay, duration: 0.6 }}
-    whileHover={{ y: -10 }}
-    className="group rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-gold/30 transition-all duration-500 overflow-hidden flex flex-col h-full"
-  >
-    {/* Image Header */}
-    <div className="relative h-56 w-full overflow-hidden">
-      <Image 
-        src={image} 
-        alt={title} 
-        fill 
-        className="object-cover transition-transform duration-1000 group-hover:scale-110" 
-        referrerPolicy="no-referrer"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 to-transparent" />
-      <div className="absolute bottom-4 left-6 w-12 h-12 rounded-xl bg-gold text-rich-black flex items-center justify-center shadow-2xl">
-        <Icon size={24} strokeWidth={2} />
-      </div>
-    </div>
-
-    {/* Content */}
-    <div className="p-8 flex-grow flex flex-col">
-      <h3 className="text-xl font-display font-bold mb-3 text-white group-hover:text-gold transition-colors">{title}</h3>
-      <p className="text-white/50 text-sm leading-relaxed mb-6">{desc}</p>
-      <div className="mt-auto pt-4 border-t border-white/5">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold opacity-0 group-hover:opacity-100 transition-opacity">Expert Level Service</span>
-      </div>
-    </div>
-  </motion.div>
-);
-
-const GalleryItem = ({ src, alt, title, subtitle, delay }: { src: string, alt: string, title: string, subtitle: string, delay: number }) => (
-  <motion.div 
-    initial={{ opacity: 0, scale: 0.95 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    viewport={{ once: true }}
-    transition={{ delay, duration: 0.8 }}
-    whileHover="hover"
-    className="relative aspect-video group overflow-hidden rounded-2xl cursor-pointer"
-  >
-    <motion.div 
-      variants={{
-        hover: { scale: 1.05 }
-      }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="absolute inset-0"
-    >
-      <Image 
-        src={src} 
-        alt={alt} 
-        fill 
-        className="object-cover" 
-        referrerPolicy="no-referrer"
-      />
-    </motion.div>
-
-    <motion.div 
-      variants={{
-        hover: { opacity: 1 }
-      }}
-      initial={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="absolute inset-0 bg-gradient-to-t from-rich-black via-transparent to-transparent flex flex-col justify-end p-8"
-    >
-      <motion.h4 
-        variants={{
-          hover: { y: 0, opacity: 1 }
-        }}
-        initial={{ y: 20, opacity: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="text-gold font-display font-bold text-lg"
-      >
-        {title}
-      </motion.h4>
-      <motion.p 
-        variants={{
-          hover: { y: 0, opacity: 1 }
-        }}
-        initial={{ y: 20, opacity: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-        className="text-white/70 text-sm"
-      >
-        {subtitle}
-      </motion.p>
-    </motion.div>
-  </motion.div>
-);
-
-// --- Main Page ---
+// --- Page Main ---
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -224,441 +288,333 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="relative">
+    <div className="relative bg-rich-black">
       <AnimatePresence>
         {isLoading && <Preloader />}
       </AnimatePresence>
 
-      <Navbar />
+      <Navbar onScrollTo={scrollToSection} />
 
       {/* Hero Section */}
-      <section id="home" className="relative min-h-[110vh] flex items-center overflow-hidden">
-        {/* Background Noise/Texture */}
-        <div className="absolute inset-0 z-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#C4A747 0.5px, transparent 0.5px)', backgroundSize: '30px 30px' }} />
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-rich-black" />
-        
-        {/* Animated Background Circles */}
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-20%] right-[-10%] w-[80vw] h-[80vw] rounded-full bg-gold/5 blur-[150px]" 
-        />
-        <motion.div 
-          animate={{ scale: [1.2, 1, 1.2], rotate: [0, -90, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-white/5 blur-[150px]" 
-        />
+      <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+           <Image 
+             src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop" 
+             alt="Luxury BG" 
+             fill 
+             className="object-cover opacity-30 grayscale"
+             priority
+           />
+           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-rich-black/50 to-rich-black" />
+        </div>
 
         <div className="container mx-auto px-6 relative z-10 pt-20">
-          <div className="max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="flex items-center gap-3 mb-6"
-            >
+          <motion.div 
+            initial="hidden" 
+            animate={isLoading ? "hidden" : "visible"}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.8 } }
+            }}
+            className="max-w-4xl"
+          >
+            <motion.div variants={{ hidden: { x: -20, opacity: 0 }, visible: { x: 0, opacity: 1 } }} className="flex items-center gap-3 mb-8">
               <span className="w-12 h-[2px] bg-gold" />
-              <span className="text-gold tracking-[0.4em] text-xs font-bold uppercase">Engineering Excellence • Ohio</span>
+              <span className="text-gold tracking-[0.4em] text-[10px] font-black uppercase italic">Master Restorers In Ohio</span>
             </motion.div>
             
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-5xl md:text-8xl font-display font-black leading-[0.9] tracking-tighter mb-8"
-            >
-              TOYOTA • LEXUS <br />
-              <span className="text-gold italic">MASTER CARE</span>
+            <motion.h1 variants={{ hidden: { y: 40, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-6xl md:text-9xl font-display font-black leading-[0.85] tracking-tighter mb-10 text-white uppercase italic">
+              PRECISION <br />
+              <span className="text-gold">RESTORATION</span>
             </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg md:text-xl text-white/50 mb-12 max-w-2xl font-medium leading-relaxed"
-            >
-              Exquisite body repair, precision painting, and advanced diagnostics for discerning car owners. Specialized in Japanse luxury and performance.
+            <motion.p variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-lg text-white/80 mb-12 max-w-xl font-medium leading-relaxed uppercase tracking-wider">
+              Specialized body work, artisan paint, and elite diagnostics for Lexus, Toyota, and High-End Performance vehicles.
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-wrap gap-4"
-            >
+            <motion.div variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="flex flex-wrap gap-5">
               <a 
                 href="#contact" 
-                className="group px-10 py-5 bg-gold text-rich-black font-black uppercase text-sm tracking-tighter flex items-center gap-3 hover:bg-white transition-all shadow-[0_20px_50px_rgba(196,167,71,0.3)]"
+                onClick={(e) => scrollToSection(e, 'contact')}
+                className="group px-12 py-6 bg-gold text-rich-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 hover:bg-white transition-all shadow-2xl"
               >
                 Book Inspection
-                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-500" />
               </a>
               <a 
                 href="#services" 
-                className="px-10 py-5 border border-white/20 text-white font-bold uppercase text-sm tracking-tighter hover:bg-white hover:text-rich-black transition-all"
+                onClick={(e) => scrollToSection(e, 'services')}
+                className="px-12 py-6 border border-white/10 text-white font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all backdrop-blur-md"
               >
                 Browse Services
               </a>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
 
         <motion.div 
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-20 hidden md:flex flex-col items-center gap-3"
         >
-          <span className="text-[10px] uppercase tracking-[0.3em] font-bold">Scroll</span>
-          <div className="w-[1px] h-10 bg-white" />
+          <span className="text-[9px] uppercase font-black tracking-[0.5em] vertical-rl">Scroll</span>
+          <div className="w-[1px] h-12 bg-white" />
         </motion.div>
       </section>
 
-      {/* Numbers Section */}
-      <section className="py-20 border-y border-white/5">
+      {/* Stats Section */}
+      <section className="py-32 bg-white/[0.02] border-y border-white/5">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-16">
+            <CountUp to="10+" label="Years of Legacy" />
+            <CountUp to="850+" label="Cars Restored" />
+            <CountUp to="1200" label="Unique Colors" />
+            <CountUp to="98%" label="Royal Satisfaction" />
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-40">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-32">
+            <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Our Workshop</motion.span>
+            <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-none italic text-white">THE WORKSHOP</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
-              { label: 'Cars Restored', val: '850+' },
-              { label: 'Paint Colors', val: '1.2k' },
-              { label: 'Expert Hours', val: '10k' },
-              { label: 'Global Exports', val: '24' },
-            ].map((stat, i) => (
+              { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'Precision structural repair using factory-grade alignment technology.' },
+              { icon: PaintRoller, title: 'Premium Respray', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Mirror-finish paint work with computerized color matching precision.' },
+              { icon: Wrench, title: 'Dent Correction', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'Artisanal paintless dent removal that protects your car original finish.' },
+              { icon: Stethoscope, title: 'Full Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'Deep-system brain scans for Toyota, Lexus, and all major brands.' },
+              { icon: Ship, title: 'Global Logistics', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'Expert vehicle export services across the ocean with zero friction.' },
+              { icon: Sparkle, title: 'Royal Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Showroom-grade deep cleaning and ceramic protection coatings.' },
+            ].map((s, i) => (
               <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
+                key={s.title}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
+                transition={{ delay: i * 0.1, duration: 0.8 }}
+                whileHover={{ y: -15 }}
+                className="group bg-charcoal/50 border border-white/5 rounded-[2.5rem] overflow-hidden transition-all duration-700 hover:border-gold/20 hover:shadow-[0_20px_60px_rgba(196,167,71,0.1)]"
               >
-                <div className="text-4xl md:text-5xl font-display font-black text-gold mb-2">{stat.val}</div>
-                <div className="text-xs uppercase tracking-widest text-white/40 font-bold">{stat.label}</div>
+                <div className="relative h-64 overflow-hidden">
+                  <Image src={s.img} alt={s.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-rich-black/50 group-hover:bg-transparent transition-all duration-700" />
+                  <div className="absolute bottom-6 left-6 w-14 h-14 bg-gold flex items-center justify-center rounded-2xl text-rich-black shadow-2xl"><s.icon size={26} /></div>
+                </div>
+                <div className="p-10">
+                  <h3 className="text-2xl font-display font-black text-white mb-4 group-hover:text-gold transition-colors">{s.title}</h3>
+                  <p className="text-white/70 text-sm leading-relaxed mb-8 uppercase tracking-widest font-bold text-[10px]">{s.desc}</p>
+                  <div className="pt-6 border-t border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Exclusive Quality Warranted</span>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="py-32 relative">
+      {/* Gallery */}
+      <section id="gallery" className="py-40 bg-black">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-            <div className="max-w-2xl">
-              <span className="text-gold font-bold uppercase tracking-[0.4em] text-xs mb-4 block">Our Expertise</span>
-              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter leading-none">
-                COMPLETE AUTO <br />
-                <span className="text-white/20">RESTORATION.</span>
-              </h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-10">
+             <div className="max-w-2xl">
+               <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-4 block italic">The Results</span>
+               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter italic text-white leading-none">THE SHOWCASE.</h2>
+             </div>
+             <p className="text-white/60 text-[10px] font-black tracking-[0.5em] uppercase border-l border-white/10 pl-8">Visual Proof of Mastery</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+             <TiltGalleryItem 
+               src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/1e9d9fa9-c92d-48e9-ba1f-25858d3b826a.jpg" 
+               alt="Toyota Build" 
+               title="Toyota Heritage" 
+               subtitle="Complete Body Restore" 
+               delay={0.1} 
+             />
+             <TiltGalleryItem 
+               src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/933f5aa4-d4c1-4bc3-9d39-a5c6c6d9221f.jpg" 
+               alt="Lexus Shine" 
+               title="Lexus Glow" 
+               subtitle="Custom Mirror Paint" 
+               delay={0.2} 
+             />
+             <TiltGalleryItem 
+               src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/57862d7b-34fb-4312-85e0-3dc0316fcb9c.jpg" 
+               alt="GX Body" 
+               title="Lexus GX 460" 
+               subtitle="Collision Recovery" 
+               delay={0.3} 
+             />
+          </div>
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="py-40 relative">
+        <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }} 
+            whileInView={{ opacity: 1, x: 0 }} 
+            transition={{ duration: 1.2, ease: "circOut" }} 
+            viewport={{ once: true }}
+          >
+            <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">Our Legacy</span>
+            <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-10 italic leading-[0.9] text-white">
+              TEN YEARS <br /> OF <span className="text-white/30">PURE ART.</span>
+            </h2>
+            <div className="space-y-8 text-white/70 text-[11px] font-black tracking-[0.2em] leading-relaxed uppercase max-w-lg">
+              <p>With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models.</p>
+              <p>We specialize in Toyota, Lexus, Honda, and Nissan, but service every luxury vehicle with the same surgical precision.</p>
             </div>
-            <p className="text-white/50 max-w-sm text-sm font-medium leading-relaxed">
-              From mirror-finish repainting to paintless dent removal, our workshop is equipped with the latest automotive technology to ensure your vehicle returns to factory standards.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ServiceCard 
-              icon={Car} 
-              title="Auto Body & Collision" 
-              desc="Structural repair and panel replacement using precision frame alignment technology." 
-              delay={0.1}
-              image="https://images.unsplash.com/photo-1486001976380-703aed69ed7a?q=80&w=2000&auto=format&fit=crop"
-            />
-            <ServiceCard 
-              icon={PaintRoller} 
-              title="Paint & Respray" 
-              desc="Computerized color matching and premium clear coats for a flawless factory-correct finish." 
-              delay={0.2}
-              image="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop"
-            />
-            <ServiceCard 
-              icon={Wrench} 
-              title="Dent Correction" 
-              desc="Specialized paintless dent repair (PDR) that preserves your original paint finish." 
-              delay={0.3}
-              image="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop"
-            />
-            <ServiceCard 
-              icon={Stethoscope} 
-              title="Full Diagnostics" 
-              desc="Deep system scans and engine health check for Toyota, Lexus, and all major brands." 
-              delay={0.4}
-              image="https://images.unsplash.com/photo-1615906655593-ad0313b52adb?q=80&w=2000&auto=format&fit=crop"
-            />
-            <ServiceCard 
-              icon={Ship} 
-              title="Global Export" 
-              desc="Logistics and sales support for shipping high-end vehicles across North America and overseas." 
-              delay={0.5}
-              image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
-            />
-            <ServiceCard 
-              icon={Sparkle} 
-              title="Elite Detailing" 
-              desc="Multi-stage paint correction, ceramic coating protection, and deep interior sterilization." 
-              delay={0.6}
-              image="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery Section */}
-      <section id="gallery" className="py-32 bg-[#080808]">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter mb-4">THE SHOWCASE</h2>
-            <p className="text-gold tracking-[0.3em] text-xs font-bold uppercase italic">Quality that speaks for itself</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <GalleryItem 
-              src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/1e9d9fa9-c92d-48e9-ba1f-25858d3b826a.jpg"
-              alt="Toyota Service"
-              title="Toyota Prado"
-              subtitle="Full Restoration"
-              delay={0.1}
-            />
-            <GalleryItem 
-              src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/933f5aa4-d4c1-4bc3-9d39-a5c6c6d9221f.jpg"
-              alt="Lexus Premium Care"
-              title="Lexus RX 350"
-              subtitle="Mirror Paint Work"
-              delay={0.2}
-            />
-            <GalleryItem 
-              src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/57862d7b-34fb-4312-85e0-3dc0316fcb9c.jpg"
-              alt="Lexus Body Work"
-              title="Lexus GX Luxury"
-              subtitle="Collision Repair"
-              delay={0.3}
-            />
-          </div>
+            <div className="mt-16 pt-12 border-t border-white/10 flex flex-wrap gap-12">
+               {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map(brand => (
+                 <span key={brand} className="text-[10px] font-black tracking-[0.5em] text-white/60 hover:text-gold transition-colors duration-500 cursor-default">{brand}</span>
+               ))}
+            </div>
+          </motion.div>
           
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <GalleryItem 
-              src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/1e37db9e-1c0c-4210-89d9-1b430e8ca23c.jpg"
-              alt="Camry Detail"
-              title="Toyota Camry"
-              subtitle="Detailing & Wax"
-              delay={0.4}
-            />
-            <motion.div 
-              whileHover={{ scale: 1.02, borderColor: 'rgba(196, 167, 71, 0.5)' }}
-              className="relative group overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-12 flex flex-col justify-center transition-colors duration-500"
-            >
-              <h3 className="text-3xl font-display font-black text-white mb-6">See the transformation?</h3>
-              <p className="text-white/50 mb-8 max-w-sm">Every project we take on is handled with absolute precision. Join our family of satisfied enthusiasts.</p>
-              <a href="#contact" className="group text-gold font-bold flex items-center gap-2">
-                Get a Quote <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
-              </a>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Us Section */}
-      <section id="about" className="py-32 relative overflow-hidden bg-white/5 border-y border-white/5">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <span className="text-gold font-bold uppercase tracking-[0.4em] text-xs mb-6 block">The Legacy</span>
-              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter mb-8 italic text-white">
-                A DECADE OF <br />
-                <span className="text-white/20">PRECISION.</span>
-              </h2>
-              <div className="space-y-6 text-white/60 leading-relaxed font-medium">
-                <p>
-                  With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models. We specialize in Toyota, Lexus, Honda, and Nissan, but service all vehicles with the same precision and care.
-                </p>
-                <p>
-                  From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export - we do it all. Every car gets the royal treatment in our state-of-the-art facility.
-                </p>
-              </div>
-
-              {/* Brand Grid */}
-              <div className="mt-12 pt-12 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-8">
-                {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map((brand) => (
-                  <div key={brand} className="text-center">
-                    <span className="text-[10px] font-black tracking-[0.4em] text-white/30 hover:text-gold transition-colors block">{brand}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="relative aspect-[4/5] rounded-3xl overflow-hidden group"
-            >
-              <Image 
-                src="https://images.unsplash.com/photo-1530046339160-ce3e5b0c7a2f?q=80&w=2000&auto=format&fit=crop" 
-                alt="Expert Mechanics" 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 via-transparent to-transparent" />
-              <div className="absolute bottom-8 left-8 right-8 p-8 glass rounded-2xl">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }} 
+            whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }} 
+            transition={{ duration: 1.5 }} 
+            viewport={{ once: true }} 
+            className="relative aspect-[4/5] rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(196,167,71,0.05)]"
+          >
+             <Image 
+               src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=2000&auto=format&fit=crop" 
+               alt="Expert At Work" 
+               fill 
+               className="object-cover grayscale hover:grayscale-0 transition-all duration-2000" 
+             />
+             <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 via-transparent to-transparent" />
+             <div className="absolute bottom-12 left-12 right-12 p-8 glass rounded-3xl border border-white/10">
                 <div className="flex items-center gap-6">
-                  <div className="text-4xl font-display font-black text-gold">10+</div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 leading-tight">
-                    Years of <br /> Excellence
+                  <div className="text-6xl font-display font-black text-gold">10+</div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 leading-tight italic">
+                    Years of <br /> Engineering <br /> Mastery
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
+             </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gold relative overflow-hidden">
+      {/* Marquee CTA */}
+      <section className="py-24 bg-gold relative overflow-hidden group cursor-pointer">
         <motion.div 
-          animate={{ x: [0, -100, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 opacity-10 flex items-center whitespace-nowrap text-[15vh] md:text-[20vh] font-display font-black italic pointer-events-none text-rich-black"
+          animate={{ x: ["0%", "-50%"] }} 
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="flex whitespace-nowrap text-[22vh] font-display font-black italic text-rich-black/10 items-center gap-20 pointer-events-none"
         >
-          DAMIZ AUTO CARE • TOYOTA • LEXUS • HONDA • NISSAN • 
+          <span>DAMIZ AUTO CARE</span>
+          <span>ROYAL RESTORATION</span>
+          <span>OHIO FINEST</span>
+          <span>DAMIZ AUTO CARE</span>
+          <span>ROYAL RESTORATION</span>
+          <span>OHIO FINEST</span>
         </motion.div>
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
-            <div className="max-w-2xl">
-              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter text-rich-black leading-none mb-4">
-                NEED AUTO BODY <br /> REPAIR?
-              </h2>
-              <p className="text-rich-black/60 font-bold uppercase text-xs tracking-widest italic">Dents • Scratches • Paint • Collision • We fix it all</p>
-            </div>
-            <a 
-              href="#contact" 
-              className="px-12 py-6 bg-rich-black text-gold font-black uppercase text-sm tracking-tighter hover:bg-white hover:text-rich-black transition-all shadow-2xl"
-            >
-              Get Free Estimate
-            </a>
-          </div>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 text-center px-6">
+           <h2 className="text-4xl md:text-7xl font-display font-black tracking-tighter text-rich-black leading-none uppercase italic">RESTORE THE ROYALTY.</h2>
+           <a 
+             href="#contact" 
+             onClick={(e) => scrollToSection(e, 'contact')}
+             className="px-16 py-7 bg-rich-black text-gold font-black uppercase text-xs tracking-[0.3em] hover:bg-white hover:text-rich-black transition-all duration-700 shadow-3xl"
+           >
+             Get A Free Quote
+           </a>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-32 relative">
+      <section id="contact" className="py-40">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             <div>
-              <h2 className="text-5xl font-display font-black tracking-tighter mb-8 italic">READY FOR THE <br /> <span className="text-gold overflow-hidden">GOLD TREATMENT?</span></h2>
-              
-              <div className="space-y-8">
-                <div className="flex gap-6 group">
-                  <div className="w-12 h-12 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all">
-                    <MapPin size={24} />
+               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase">CONNECT <br /> <span className="text-gold">TO THE GOLD.</span></h2>
+               <div className="space-y-12 font-black uppercase text-[11px] tracking-[0.3em]">
+                  <div className="flex gap-8 items-center group cursor-pointer">
+                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MapPin size={24} /></div>
+                    <div><div className="text-white/60 mb-1">HQ Workshop</div><div className="text-white text-sm">Ohio, United States</div></div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-1">Our Workshop</h4>
-                    <p className="text-white font-bold group-hover:text-gold transition-colors">Ohio, United States</p>
+                  <div className="flex gap-8 items-center group cursor-pointer">
+                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><Phone size={24} /></div>
+                    <div><div className="text-white/60 mb-1">Direct Line</div><div className="text-white text-sm">(380) 223-7472</div></div>
                   </div>
-                </div>
-
-                <div className="flex gap-6 group">
-                  <div className="w-12 h-12 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all">
-                    <Phone size={24} />
+                  <div className="flex gap-8 items-center group cursor-pointer">
+                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MessageCircle size={24} /></div>
+                    <div><div className="text-white/60 mb-1">WhatsApp</div><a href="https://wa.me/13802237472" target="_blank" className="text-gold text-sm underline decoration-gold/20 hover:decoration-gold transition-all italic">Launch Chat</a></div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-1">Direct Line</h4>
-                    <p className="text-white font-bold group-hover:text-gold transition-colors">(380) 223-7472</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-6 group">
-                  <div className="w-12 h-12 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all">
-                    <MessageCircle size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-1">WhatsApp Chat</h4>
-                    <a href="https://wa.me/13802237472" target="_blank" className="text-gold font-black uppercase text-xs tracking-[0.2em] flex items-center gap-1 hover:underline">
-                      Chat Now
-                    </a>
-                  </div>
-                </div>
-              </div>
+               </div>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }} 
+              whileInView={{ opacity: 1, y: 0 }} 
               viewport={{ once: true }}
-              className="p-10 glass rounded-3xl relative overflow-hidden"
+              className="bg-white/[0.03] p-12 md:p-16 rounded-[3.5rem] border border-white/5 relative overflow-hidden group"
             >
-              <div className="relative z-10 space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 ml-1">Name</label>
-                    <input type="text" className="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold transition-all text-white font-medium" placeholder="John Doe" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 ml-1">Phone</label>
-                    <input type="text" className="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold transition-all text-white font-medium" placeholder="+1..." />
-                  </div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[120px] pointer-events-none" />
+              <div className="relative z-10 space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <AnimatedInput label="Your Name" placeholder="Ex: Alex Johnson" />
+                  <AnimatedInput label="Phone Number" placeholder="+1..." />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 ml-1">Service Type</label>
-                  <select className="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold transition-all text-white/50 font-medium">
-                    <option>Body Repair & Collision</option>
-                    <option>Custom Paint Work</option>
-                    <option>General Maintenance</option>
-                    <option>Vehicle Inspection</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 ml-1">Description</label>
-                  <textarea rows={4} className="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold transition-all text-white font-medium resize-none" placeholder="Tell us about your vehicle..." />
-                </div>
-                <button className="w-full py-5 bg-gold text-rich-black font-black uppercase text-sm tracking-tighter hover:bg-white transition-all shadow-[0_20px_40px_rgba(196,167,71,0.2)]">
-                  Submit Request
-                </button>
+                <AnimatedInput 
+                  label="Service Interest" 
+                  type="select" 
+                  options={['Major Collision Repair', 'Custom Paint & Finish', 'Paintless Dent Removal', 'Advanced Diagnostics', 'Luxury Detail Packages', 'Global Vehicle Export']} 
+                />
+                <AnimatedInput label="Vehicle & Requirements" type="textarea" placeholder="Tell us about the project..." />
+                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white hover:scale-[1.02] transition-all duration-700 mt-6 shadow-2xl active:scale-95">Verify & Send Request</button>
               </div>
-              
-              {/* Decorative light */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 blur-3xl" />
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-20 bg-rich-black border-t border-white/5">
+      <footer className="py-24 border-t border-white/10 bg-black">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
-            <div>
-              <a href="#" className="flex flex-col mb-6">
-                <span className="text-3xl font-display font-black tracking-tighter text-gold">DAMIZ</span>
-                <span className="text-xs tracking-[0.4em] font-medium text-white/50 uppercase">Auto Care Specialists</span>
-              </a>
-              <p className="text-white/30 text-xs font-bold uppercase tracking-widest max-w-xs">
-                Excellence in automotive craftmanship. Ohio established, globally recognized.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-10">
-              {['Home', 'Services', 'Gallery', 'About', 'Contact'].map(link => (
-                <a key={link} href={`#${link.toLowerCase()}`} className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-gold transition-colors">{link}</a>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 glass flex items-center justify-center hover:bg-gold hover:text-rich-black transition-all rounded-full"><Phone size={18} /></a>
-              <a href="#" className="w-10 h-10 glass flex items-center justify-center hover:bg-gold hover:text-rich-black transition-all rounded-full"><Mail size={18} /></a>
-            </div>
-          </div>
-          
-          <div className="mt-20 pt-10 border-t border-white/5 text-center text-[10px] text-white/20 uppercase font-black tracking-[0.5em]">
-            &copy; {new Date().getFullYear()} Damiz Auto Care • All Rights Reserved.
-          </div>
+           <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
+              <div className="space-y-4">
+                 <div className="text-3xl font-display font-black text-gold tracking-tighter">DAMIZ</div>
+                 <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm">Crafting automotive excellence through precision and luxury heritage.</p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-10">
+                {['Terms', 'Privacy', 'Services', 'Gallery', 'About', 'Contact'].map(l => (
+                  <a key={l} href="#" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70 hover:text-gold transition-all duration-500">{l}</a>
+                ))}
+              </div>
+           </div>
+           
+           <div className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="text-[9px] font-black tracking-[1em] text-white/60 uppercase">
+                &copy; {new Date().getFullYear()} Damiz Auto Care Specialists
+              </div>
+              <div className="flex gap-6">
+                 <a href="#" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Phone size={16} /></a>
+                 <a href="#" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Mail size={16} /></a>
+              </div>
+           </div>
         </div>
       </footer>
     </div>
