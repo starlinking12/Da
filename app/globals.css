@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  
+  --color-gold: #C4A747;
+  --color-gold-dark: #8B6B3F;
+  --color-charcoal: #111111;
+  --color-rich-black: #050505;
+}
+
+@layer base {
+  body {
+    @apply selection:bg-gold selection:text-rich-black;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  }
+  .gold-gradient {
+    @apply bg-gradient-to-br from-gold via-gold-dark to-gold;
+  }
+  .text-glow {
+    text-shadow: 0 0 20px rgba(196, 167, 71, 0.4);
+  }
+}
