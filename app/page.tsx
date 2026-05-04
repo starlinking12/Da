@@ -39,6 +39,12 @@ const CountUp = ({ to, label }: { to: string, label: string }) => {
           const animate = (currentTime: number) => {
             const elapsedTime = currentTime - startTime;
             const progress = Math.min(elapsedTime / duration, 1);
+            
+            if (progress >= 1) {
+              setCount(targetValue);
+              return;
+            }
+
             // Ease out expo
             const easedProgress = 1 - Math.pow(2, -10 * progress);
             setCount(Math.floor(easedProgress * targetValue));
@@ -231,13 +237,22 @@ const Navbar = ({ onScrollTo }: { onScrollTo: (e: React.MouseEvent<HTMLAnchorEle
               <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gold transition-all duration-500 group-hover:w-full" />
             </a>
           ))}
-          <a 
-            href="#contact" 
-            onClick={(e) => onScrollTo(e, 'contact')}
-            className="px-8 py-3 bg-gold text-rich-black font-black text-[10px] uppercase tracking-widest hover:bg-white hover:scale-105 transition-all duration-500 shadow-[0_10px_30px_rgba(196,167,71,0.2)]"
-          >
-            Get Estimate
-          </a>
+          <div className="flex items-center gap-4">
+            <a 
+              href="#contact" 
+              onClick={(e) => onScrollTo(e, 'contact')}
+              className="px-6 py-2.5 border border-gold/30 text-gold font-black text-[10px] uppercase tracking-widest hover:bg-gold hover:text-rich-black transition-all duration-500"
+            >
+              Book Now
+            </a>
+            <a 
+              href="#contact" 
+              onClick={(e) => onScrollTo(e, 'contact')}
+              className="px-8 py-3 bg-gold text-rich-black font-black text-[10px] uppercase tracking-widest hover:bg-white hover:scale-105 transition-all duration-500 shadow-[0_10px_30px_rgba(196,167,71,0.2)]"
+            >
+              Get Free Estimate
+            </a>
+          </div>
         </div>
 
         <button className="md:hidden text-gold z-[60] p-2" onClick={() => setIsOpen(!isOpen)}>
@@ -314,7 +329,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-0">
            <Image 
              src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop" 
-             alt="Luxury BG" 
+             alt="Professional Auto Body Workshop Background" 
              fill 
              className="object-cover opacity-30 grayscale"
              priority
@@ -352,7 +367,7 @@ export default function HomePage() {
                 onClick={(e) => scrollToSection(e, 'contact')}
                 className="group px-12 py-6 bg-gold text-rich-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 hover:bg-white transition-all shadow-2xl"
               >
-                Get My Estimate
+                Get Free Estimate
                 <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-500" />
               </a>
               <a 
@@ -360,7 +375,7 @@ export default function HomePage() {
                 onClick={(e) => scrollToSection(e, 'services')}
                 className="px-12 py-6 border border-white/10 text-white font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all backdrop-blur-md"
               >
-                What We Do
+                Our Services
               </a>
             </motion.div>
           </motion.div>
@@ -382,7 +397,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-16">
             <CountUp to="10+" label="Years in Business" />
             <CountUp to="850+" label="Cars Repaired" />
-            <CountUp to="1200" label="Paint Jobs" />
+            <CountUp to="350+" label="Paint Jobs" />
             <CountUp to="98%" label="Happy Customers" />
           </div>
         </div>
@@ -477,13 +492,13 @@ export default function HomePage() {
             transition={{ duration: 1.2, ease: "circOut" }} 
             viewport={{ once: true }}
           >
-            <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">Our History</span>
+            <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">About Us</span>
             <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-10 italic leading-[0.9] text-white">
-              TEN YEARS <br /> OF <span className="text-white/30">HARD WORK.</span>
+              Ohio&apos;s Complete <br /> <span className="text-white/30">Auto Care Specialists</span>
             </h2>
             <div className="space-y-8 text-white/70 text-[11px] font-black tracking-[0.2em] leading-relaxed uppercase max-w-lg">
               <p>With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models. We specialize in Toyota, Lexus, Honda, and Nissan, but service all vehicles with the same precision and care.</p>
-              <p>From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export — we do it all. Every customer gets the royal treatment in our state-of-the-art facility.</p>
+              <p>From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export - we do it all. Every car gets the royal treatment.</p>
             </div>
             <div className="mt-16 pt-12 border-t border-white/10 flex flex-wrap gap-12">
                {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map(brand => (
