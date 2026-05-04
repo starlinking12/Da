@@ -334,16 +334,16 @@ export default function HomePage() {
           >
             <motion.div variants={{ hidden: { x: -20, opacity: 0 }, visible: { x: 0, opacity: 1 } }} className="flex items-center gap-3 mb-8">
               <span className="w-12 h-[2px] bg-gold" />
-              <span className="text-gold tracking-[0.4em] text-[10px] font-black uppercase italic">Master Restorers In Ohio</span>
+              <span className="text-gold tracking-[0.4em] text-[10px] font-black uppercase italic">Top Rated Auto Body In Ohio</span>
             </motion.div>
             
             <motion.h1 variants={{ hidden: { y: 40, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-6xl md:text-9xl font-display font-black leading-[0.85] tracking-tighter mb-10 text-white uppercase italic">
-              PRECISION <br />
-              <span className="text-gold">RESTORATION</span>
+              QUALITY <br />
+              <span className="text-gold">AUTO BODY</span>
             </motion.h1>
 
             <motion.p variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-lg text-white/80 mb-12 max-w-xl font-medium leading-relaxed uppercase tracking-wider">
-              Specialized body work, artisan paint, and elite diagnostics for Lexus, Toyota, and High-End Performance vehicles.
+              Expert collision repair, professional paint, and full diagnostics for Toyota, Lexus, and all major makes and models.
             </motion.p>
 
             <motion.div variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="flex flex-wrap gap-5">
@@ -352,7 +352,7 @@ export default function HomePage() {
                 onClick={(e) => scrollToSection(e, 'contact')}
                 className="group px-12 py-6 bg-gold text-rich-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 hover:bg-white transition-all shadow-2xl"
               >
-                Book Inspection
+                Get My Estimate
                 <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-500" />
               </a>
               <a 
@@ -360,7 +360,7 @@ export default function HomePage() {
                 onClick={(e) => scrollToSection(e, 'services')}
                 className="px-12 py-6 border border-white/10 text-white font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all backdrop-blur-md"
               >
-                Browse Services
+                What We Do
               </a>
             </motion.div>
           </motion.div>
@@ -380,10 +380,10 @@ export default function HomePage() {
       <section className="py-32 bg-white/[0.02] border-y border-white/5">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-16">
-            <CountUp to="10+" label="Years of Legacy" />
-            <CountUp to="850+" label="Cars Restored" />
-            <CountUp to="1200" label="Unique Colors" />
-            <CountUp to="98%" label="Royal Satisfaction" />
+            <CountUp to="10+" label="Years in Business" />
+            <CountUp to="850+" label="Cars Repaired" />
+            <CountUp to="1200" label="Paint Jobs" />
+            <CountUp to="98%" label="Happy Customers" />
           </div>
         </div>
       </section>
@@ -392,18 +392,18 @@ export default function HomePage() {
       <section id="services" className="py-40">
         <div className="container mx-auto px-6">
           <div className="text-center mb-32">
-            <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Our Workshop</motion.span>
-            <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-none italic text-white">THE WORKSHOP</h2>
+            <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Our Work</motion.span>
+            <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-none italic text-white">OUR SERVICES</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
-              { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'Precision structural repair using factory-grade alignment technology.' },
-              { icon: PaintRoller, title: 'Premium Respray', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Mirror-finish paint work with computerized color matching precision.' },
-              { icon: Wrench, title: 'Dent Correction', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'Artisanal paintless dent removal that protects your car original finish.' },
-              { icon: Stethoscope, title: 'Full Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'Deep-system brain scans for Toyota, Lexus, and all major brands.' },
-              { icon: Ship, title: 'Global Logistics', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'Expert vehicle export services across the ocean with zero friction.' },
-              { icon: Sparkle, title: 'Royal Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Showroom-grade deep cleaning and ceramic protection coatings.' },
+              { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'We handle everything from major accidents to frame straightening using professional equipment.' },
+              { icon: PaintRoller, title: 'Custom Paint Work', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Factory color matching and high-quality clear coats to make your car look like new again.' },
+              { icon: Wrench, title: 'Paintless Dent Repair', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'We can pull out most dents without needing to repaint, keeping your factory finish intact.' },
+              { icon: Stethoscope, title: 'Computer Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'Complete engine and system scans to find exactly what is wrong with your vehicle.' },
+              { icon: Ship, title: 'Shipping & Export', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'If you need your vehicle moved across state lines or overseas, we handle the logistics.' },
+              { icon: Sparkle, title: 'Full Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Full interior and exterior cleaning, paint polishing, and protective coatings.' },
             ].map((s, i) => (
               <motion.div
                 key={s.title}
@@ -423,7 +423,7 @@ export default function HomePage() {
                   <h3 className="text-2xl font-display font-black text-white mb-4 group-hover:text-gold transition-colors">{s.title}</h3>
                   <p className="text-white/70 text-sm leading-relaxed mb-8 uppercase tracking-widest font-bold text-[10px]">{s.desc}</p>
                   <div className="pt-6 border-t border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Exclusive Quality Warranted</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Quality Workmanship Guaranteed</span>
                   </div>
                 </div>
               </motion.div>
@@ -437,10 +437,10 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-10">
              <div className="max-w-2xl">
-               <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-4 block italic">The Results</span>
-               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter italic text-white leading-none">THE SHOWCASE.</h2>
+               <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-4 block italic">Our Projects</span>
+               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter italic text-white leading-none">RECENT WORK.</h2>
              </div>
-             <p className="text-white/60 text-[10px] font-black tracking-[0.5em] uppercase border-l border-white/10 pl-8">Visual Proof of Mastery</p>
+             <p className="text-white/60 text-[10px] font-black tracking-[0.5em] uppercase border-l border-white/10 pl-8">Quality you can see for yourself</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
              <TiltGalleryItem 
@@ -477,13 +477,13 @@ export default function HomePage() {
             transition={{ duration: 1.2, ease: "circOut" }} 
             viewport={{ once: true }}
           >
-            <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">Our Legacy</span>
+            <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">Our History</span>
             <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-10 italic leading-[0.9] text-white">
-              TEN YEARS <br /> OF <span className="text-white/30">PURE ART.</span>
+              TEN YEARS <br /> OF <span className="text-white/30">HARD WORK.</span>
             </h2>
             <div className="space-y-8 text-white/70 text-[11px] font-black tracking-[0.2em] leading-relaxed uppercase max-w-lg">
-              <p>With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models.</p>
-              <p>We specialize in Toyota, Lexus, Honda, and Nissan, but service every luxury vehicle with the same surgical precision.</p>
+              <p>With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models. We specialize in Toyota, Lexus, Honda, and Nissan, but service all vehicles with the same precision and care.</p>
+              <p>From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export — we do it all. Every customer gets the royal treatment in our state-of-the-art facility.</p>
             </div>
             <div className="mt-16 pt-12 border-t border-white/10 flex flex-wrap gap-12">
                {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map(brand => (
@@ -510,7 +510,7 @@ export default function HomePage() {
                 <div className="flex items-center gap-6">
                   <div className="text-6xl font-display font-black text-gold">10+</div>
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 leading-tight italic">
-                    Years of <br /> Engineering <br /> Mastery
+                    Years of <br /> Real World <br /> Experience
                   </div>
                 </div>
              </div>
@@ -526,14 +526,14 @@ export default function HomePage() {
           className="flex whitespace-nowrap text-[22vh] font-display font-black italic text-rich-black/10 items-center gap-20 pointer-events-none"
         >
           <span>DAMIZ AUTO CARE</span>
-          <span>ROYAL RESTORATION</span>
-          <span>OHIO FINEST</span>
+          <span>QUALITY BODY WORK</span>
+          <span>BEST IN OHIO</span>
           <span>DAMIZ AUTO CARE</span>
-          <span>ROYAL RESTORATION</span>
-          <span>OHIO FINEST</span>
+          <span>QUALITY BODY WORK</span>
+          <span>BEST IN OHIO</span>
         </motion.div>
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 text-center px-6">
-           <h2 className="text-4xl md:text-7xl font-display font-black tracking-tighter text-rich-black leading-none uppercase italic">RESTORE THE ROYALTY.</h2>
+           <h2 className="text-4xl md:text-7xl font-display font-black tracking-tighter text-rich-black leading-none uppercase italic">GET YOUR CAR BACK ON THE ROAD.</h2>
            <a 
              href="#contact" 
              onClick={(e) => scrollToSection(e, 'contact')}
@@ -549,7 +549,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             <div>
-               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase">CONNECT <br /> <span className="text-gold">TO THE GOLD.</span></h2>
+               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase">GET IN TOUCH <br /> <span className="text-gold">FOR AN ESTIMATE.</span></h2>
                <div className="space-y-12 font-black uppercase text-[11px] tracking-[0.3em]">
                   <div className="flex gap-8 items-center group cursor-pointer">
                     <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MapPin size={24} /></div>
@@ -581,10 +581,10 @@ export default function HomePage() {
                 <AnimatedInput 
                   label="Service Interest" 
                   type="select" 
-                  options={['Major Collision Repair', 'Custom Paint & Finish', 'Paintless Dent Removal', 'Advanced Diagnostics', 'Luxury Detail Packages', 'Global Vehicle Export']} 
+                  options={['Major Collision Repair', 'Custom Paint Work', 'Paintless Dent Repair', 'Computer Diagnostics', 'Full Detailing', 'Car Shipping & Export']} 
                 />
                 <AnimatedInput label="Vehicle & Requirements" type="textarea" placeholder="Tell us about the project..." />
-                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white hover:scale-[1.02] transition-all duration-700 mt-6 shadow-2xl active:scale-95">Verify & Send Request</button>
+                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white hover:scale-[1.02] transition-all duration-700 mt-6 shadow-2xl active:scale-95">Get My Free Estimate</button>
               </div>
             </motion.div>
           </div>
@@ -597,7 +597,7 @@ export default function HomePage() {
            <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
               <div className="space-y-4">
                  <div className="text-3xl font-display font-black text-gold tracking-tighter">DAMIZ</div>
-                 <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm">Crafting automotive excellence through precision and luxury heritage.</p>
+                 <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm">Over a decade of experience in quality auto body and collision repair.</p>
               </div>
               <div className="flex flex-wrap justify-center gap-10">
                 {['Terms', 'Privacy', 'Services', 'Gallery', 'About', 'Contact'].map(l => (
