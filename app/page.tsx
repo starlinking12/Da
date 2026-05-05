@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { 
   Car, 
@@ -14,284 +14,17 @@ import {
   Mail, 
   MapPin, 
   MessageCircle, 
-  Menu, 
-  X, 
-  ChevronRight, 
-  ArrowRight 
+  ArrowRight,
+  Facebook,
+  Instagram
 } from 'lucide-react';
 
-// --- Premium Animated Components ---
-
-const CountUp = ({ to, label }: { to: string, label: string }) => {
-  const [count, setCount] = useState(0);
-  const nodeRef = useRef(null);
-  const targetValue = parseInt(to.replace(/\D/g, ''));
-  const suffix = to.replace(/[0-9]/g, '');
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          let startValue = 0;
-          const duration = 2000;
-          const startTime = performance.now();
-
-          const animate = (currentTime: number) => {
-            const elapsedTime = currentTime - startTime;
-            const progress = Math.min(elapsedTime / duration, 1);
-            
-            if (progress >= 1) {
-              setCount(targetValue);
-              return;
-            }
-
-            // Ease out expo
-            const easedProgress = 1 - Math.pow(2, -10 * progress);
-            setCount(Math.floor(easedProgress * targetValue));
-
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            }
-          };
-          requestAnimationFrame(animate);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (nodeRef.current) observer.observe(nodeRef.current);
-    return () => observer.disconnect();
-  }, [targetValue]);
-
-  return (
-    <div ref={nodeRef} className="text-center group">
-      <div className="text-4xl md:text-6xl font-display font-black text-gold mb-2 transition-transform duration-500 group-hover:scale-110">
-        {count}{suffix}
-      </div>
-      <div className="text-[10px] uppercase tracking-[0.4em] text-white/60 font-bold">{label}</div>
-    </div>
-  );
-};
-
-const TiltGalleryItem = ({ src, alt, title, subtitle, delay }: { src: string, alt: string, title: string, subtitle: string, delay: number }) => {
-  const x = useMotionValue(0.5);
-  const y = useMotionValue(0.5);
-
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
-
-  const rotateX = useTransform(mouseYSpring, [0, 1], ["7deg", "-7deg"]);
-  const rotateY = useTransform(mouseXSpring, [0, 1], ["-7deg", "7deg"]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width);
-    y.set((e.clientY - rect.top) / rect.height);
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 1, ease: "easeOut" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { x.set(0.5); y.set(0.5); }}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      className="relative aspect-video group overflow-hidden rounded-3xl cursor-pointer bg-charcoal"
-    >
-      <motion.div className="absolute inset-0" style={{ transform: "translateZ(30px)" }}>
-        <Image 
-          src={src} 
-          alt={alt} 
-          fill 
-          className="object-cover transition-transform duration-1000 group-hover:scale-110" 
-          referrerPolicy="no-referrer"
-        />
-      </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-rich-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col justify-end p-8">
-        <div style={{ transform: "translateZ(60px)" }}>
-          <h4 className="text-gold font-display font-bold text-xl mb-1">{title}</h4>
-          <p className="text-white/60 text-xs font-bold uppercase tracking-widest">{subtitle}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-const AnimatedInput = ({ label, type = "text", placeholder, options }: { label: string, type?: string, placeholder?: string, options?: string[] }) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState("");
-
-  const inputId = label.toLowerCase().replace(/\s/g, '-');
-
-  return (
-    <div className="space-y-2 relative">
-      <label 
-        htmlFor={inputId}
-        className={`text-[10px] uppercase font-bold tracking-[0.2em] ml-1 transition-all duration-300 ${isFocused || value ? 'text-gold' : 'text-white/60'}`}
-      >
-        {label}
-      </label>
-      <div className="relative overflow-hidden rounded-xl">
-        {type === "select" ? (
-          <select 
-            id={inputId}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onChange={(e) => setValue(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium appearance-none cursor-pointer"
-          >
-            {options?.map(opt => <option key={opt} className="bg-charcoal text-white">{opt}</option>)}
-          </select>
-        ) : type === "textarea" ? (
-          <textarea 
-            id={inputId}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onChange={(e) => setValue(e.target.value)}
-            rows={4} 
-            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium resize-none" 
-            placeholder={placeholder} 
-          />
-        ) : (
-          <input 
-            id={inputId}
-            type={type}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onChange={(e) => setValue(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 p-4 focus:outline-none transition-all text-white font-medium" 
-            placeholder={placeholder} 
-          />
-        )}
-        <motion.div 
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: isFocused ? 1 : 0 }}
-          className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold origin-left z-10"
-        />
-      </div>
-    </div>
-  );
-};
-
-// --- Core UI Components ---
-
-const Preloader = () => (
-  <motion.div
-    initial={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed inset-0 z-[100] bg-rich-black flex items-center justify-center"
-  >
-    <div className="text-center">
-      <motion.div
-        initial={{ y: 20, opacity: 0, letterSpacing: "1em" }}
-        animate={{ y: 0, opacity: 1, letterSpacing: "0.5em" }}
-        transition={{ duration: 1, ease: "circOut" }}
-        className="text-5xl font-display font-black text-gold mb-6"
-      >
-        DAMIZ
-      </motion.div>
-      <div className="w-48 h-[1px] bg-white/10 mx-auto relative overflow-hidden">
-        <motion.div
-          animate={{ left: ["-100%", "100%"] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-gold/50 w-full"
-        />
-      </div>
-    </div>
-  </motion.div>
-);
-
-const Navbar = ({ onScrollTo }: { onScrollTo: (e: React.MouseEvent<HTMLAnchorElement>, id: string) => void }) => {
-  const [scrolled, setScrolled] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navLinks = ['home', 'services', 'gallery', 'about', 'contact'];
-
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${scrolled ? 'py-4 bg-rich-black/70 backdrop-blur-2xl border-b border-white/5 shadow-2xl' : 'py-8 bg-transparent'}`}>
-      <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#" onClick={(e) => onScrollTo(e, 'home')} className="flex flex-col group relative z-[60]">
-          <span className="text-2xl font-display font-black tracking-tighter text-gold group-hover:text-white transition-colors duration-500">DAMIZ</span>
-          <span className="text-[10px] tracking-[0.3em] font-medium text-white/50 group-hover:text-gold transition-colors duration-500 uppercase">Auto Care</span>
-        </a>
-
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-10">
-          {navLinks.map((item) => (
-            <a 
-              key={item} 
-              href={`#${item}`} 
-              onClick={(e) => onScrollTo(e, item)}
-              className="text-[10px] font-bold text-white/50 hover:text-gold transition-all duration-300 uppercase tracking-[0.2em] relative group"
-            >
-              {item}
-              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gold transition-all duration-500 group-hover:w-full" />
-            </a>
-          ))}
-          <div className="flex items-center gap-4">
-            <a 
-              href="#contact" 
-              onClick={(e) => onScrollTo(e, 'contact')}
-              className="px-6 py-2.5 border border-gold/30 text-gold font-black text-[10px] uppercase tracking-widest hover:bg-gold hover:text-rich-black transition-all duration-500"
-            >
-              Book Now
-            </a>
-            <a 
-              href="#contact" 
-              onClick={(e) => onScrollTo(e, 'contact')}
-              className="px-8 py-3 bg-gold text-rich-black font-black text-[10px] uppercase tracking-widest hover:bg-white hover:scale-105 transition-all duration-500 shadow-[0_10px_30px_rgba(196,167,71,0.2)]"
-            >
-              Get Free Estimate
-            </a>
-          </div>
-        </div>
-
-        <button className="md:hidden text-gold z-[60] p-2" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 200 }}
-            className="fixed inset-0 bg-rich-black z-50 flex flex-col items-center justify-center gap-8 md:hidden p-6"
-          >
-            {navLinks.map((item) => (
-              <a 
-                key={item} 
-                href={`#${item}`} 
-                onClick={(e) => { onScrollTo(e, item); setIsOpen(false); }}
-                className="text-4xl font-display font-black text-white hover:text-gold transition-colors uppercase italic tracking-tighter"
-              >
-                {item}
-              </a>
-            ))}
-            <a 
-              href="#contact" 
-              onClick={(e) => { onScrollTo(e, 'contact'); setIsOpen(false); }}
-              className="mt-8 px-12 py-5 bg-gold text-rich-black font-black uppercase text-sm tracking-widest"
-            >
-              Book Now
-            </a>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
-  );
-};
+import { CountUp } from '@/components/CountUp';
+import { TiltGalleryItem } from '@/components/TiltGalleryItem';
+import { AnimatedInput } from '@/components/AnimatedInput';
+import { Preloader } from '@/components/Preloader';
+import { Navbar } from '@/components/Navbar';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 // --- Page Main ---
 
@@ -323,6 +56,7 @@ export default function HomePage() {
       </AnimatePresence>
 
       <Navbar onScrollTo={scrollToSection} />
+      <WhatsAppButton />
 
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
@@ -353,12 +87,12 @@ export default function HomePage() {
             </motion.div>
             
             <motion.h1 variants={{ hidden: { y: 40, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-6xl md:text-9xl font-display font-black leading-[0.85] tracking-tighter mb-10 text-white uppercase italic">
-              QUALITY <br />
-              <span className="text-gold">AUTO BODY</span>
+              COLUMBUS <br />
+              <span className="text-gold">PRO AUTO BODY</span>
             </motion.h1>
 
             <motion.p variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="text-lg text-white/80 mb-12 max-w-xl font-medium leading-relaxed uppercase tracking-wider">
-              Expert collision repair, professional paint, and full diagnostics for Toyota, Lexus, and all major makes and models.
+              We provide honest collision repair, professional paint work, and full computer diagnostics right here in Columbus.
             </motion.p>
 
             <motion.div variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }} className="flex flex-wrap gap-5">
@@ -413,26 +147,39 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
-              { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'We handle everything from major accidents to frame straightening using professional equipment.' },
-              { icon: PaintRoller, title: 'Custom Paint Work', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Factory color matching and high-quality clear coats to make your car look like new again.' },
-              { icon: Wrench, title: 'Paintless Dent Repair', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'We can pull out most dents without needing to repaint, keeping your factory finish intact.' },
-              { icon: Stethoscope, title: 'Computer Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'Complete engine and system scans to find exactly what is wrong with your vehicle.' },
-              { icon: Ship, title: 'Shipping & Export', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'If you need your vehicle moved across state lines or overseas, we handle the logistics.' },
-              { icon: Sparkle, title: 'Full Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Full interior and exterior cleaning, paint polishing, and protective coatings.' },
+              { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'From major accidents to fender benders, we restore your car frame and body to safety standards.' },
+              { icon: PaintRoller, title: 'Factory-Grade Paint', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Using computerized color matching to get that standard factory finish back on your vehicle.' },
+              { icon: Wrench, title: 'Paintless Dent Removal', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'We fix dings and dents without needing a full repaint, saving you time and protecting your car original paint.' },
+              { icon: Stethoscope, title: 'Advanced Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'We use the latest scans to find engine, electrical, and sensor issues quickly and accurately.' },
+              { icon: Ship, title: 'Car Export Services', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'Shipping your car out of state or overseas? We handle the logistics and all the paperwork for you.' },
+              { icon: Sparkle, title: 'Full Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Deep interior cleaning, paint polishing, and ceramic coatings to keep your ride looking sharp.' },
             ].map((s, i) => (
               <motion.div
                 key={s.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial="initial"
+                whileHover="hover"
+                variants={{
+                  initial: { opacity: 0, y: 30 },
+                  visible: { opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.8 } },
+                  hover: { y: -15 }
+                }}
+                whileInView="visible"
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.8 }}
-                whileHover={{ y: -15 }}
                 className="group bg-charcoal/50 border border-white/5 rounded-[2.5rem] overflow-hidden transition-all duration-700 hover:border-gold/20 hover:shadow-[0_20px_60px_rgba(196,167,71,0.1)]"
               >
                 <div className="relative h-64 overflow-hidden">
-                  <Image src={s.img} alt={s.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" />
+                  <Image src={s.img} alt={s.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-transform duration-[1.5s] group-hover:scale-125" />
                   <div className="absolute inset-0 bg-rich-black/50 group-hover:bg-transparent transition-all duration-700" />
-                  <div className="absolute bottom-6 left-6 w-14 h-14 bg-gold flex items-center justify-center rounded-2xl text-rich-black shadow-2xl"><s.icon size={26} /></div>
+                  <motion.div 
+                    variants={{
+                      initial: { y: 0, x: 0 },
+                      hover: { y: -15, x: 8, rotate: -5 }
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute bottom-6 left-6 w-14 h-14 bg-gold flex items-center justify-center rounded-2xl text-rich-black shadow-2xl z-10"
+                  >
+                    <s.icon size={26} />
+                  </motion.div>
                 </div>
                 <div className="p-10">
                   <h3 className="text-2xl font-display font-black text-white mb-4 group-hover:text-gold transition-colors">{s.title}</h3>
@@ -460,23 +207,23 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
              <TiltGalleryItem 
                src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/1e9d9fa9-c92d-48e9-ba1f-25858d3b826a.jpg" 
-               alt="Toyota Build" 
-               title="Toyota Heritage" 
-               subtitle="Complete Body Restore" 
+               alt="Toyota Body Repair" 
+               title="Toyota Camry Repair" 
+               subtitle="Full Front-End Restoration" 
                delay={0.1} 
              />
              <TiltGalleryItem 
                src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/933f5aa4-d4c1-4bc3-9d39-a5c6c6d9221f.jpg" 
-               alt="Lexus Shine" 
-               title="Lexus Glow" 
-               subtitle="Custom Mirror Paint" 
+               alt="Lexus Paint Refinish" 
+               title="Lexus ES350 Paint" 
+               subtitle="Quarter Panel & Door Blend" 
                delay={0.2} 
              />
              <TiltGalleryItem 
                src="https://i.supaimg.com/132f2ac7-48b1-4d17-a8ab-6da547b28299/57862d7b-34fb-4312-85e0-3dc0316fcb9c.jpg" 
-               alt="GX Body" 
-               title="Lexus GX 460" 
-               subtitle="Collision Recovery" 
+               alt="Lexus GX Repair" 
+               title="Lexus GX460 Body" 
+               subtitle="Major Collision Repair" 
                delay={0.3} 
              />
           </div>
@@ -494,11 +241,11 @@ export default function HomePage() {
           >
             <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-8 block">About Us</span>
             <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-10 italic leading-[0.9] text-white">
-              Ohio&apos;s Complete <br /> <span className="text-white/30">Auto Care Specialists</span>
+              OVER A DECADE <br /> OF <span className="text-white/30">RELIABILITY.</span>
             </h2>
             <div className="space-y-8 text-white/70 text-[11px] font-black tracking-[0.2em] leading-relaxed uppercase max-w-lg">
-              <p>With over a decade of experience, Damiz Auto Care provides complete auto repair and body work for all makes and models. We specialize in Toyota, Lexus, Honda, and Nissan, but service all vehicles with the same precision and care.</p>
-              <p>From minor scratch repair to major collision work, painting, diagnostics, and even vehicle export - we do it all. Every car gets the royal treatment.</p>
+              <p>With over ten years on the job, Damiz Auto Care is your home for complete body work and mechanical repair in Columbus. Whether you drive a Toyota, Lexus, or a luxury import, we treat every car like it belongs to our own family.</p>
+              <p>We handle everything from major collision repairs to minor dings and shipping logistics. You get honest talk and top-tier workmanship, every single time.</p>
             </div>
             <div className="mt-16 pt-12 border-t border-white/10 flex flex-wrap gap-12">
                {['TOYOTA', 'LEXUS', 'HONDA', 'NISSAN'].map(brand => (
@@ -541,20 +288,19 @@ export default function HomePage() {
           className="flex whitespace-nowrap text-[22vh] font-display font-black italic text-rich-black/10 items-center gap-20 pointer-events-none"
         >
           <span>DAMIZ AUTO CARE</span>
-          <span>QUALITY BODY WORK</span>
-          <span>BEST IN OHIO</span>
+          <span>QUALITY REPAIRS</span>
+          <span>COLUMBUS OHIO</span>
           <span>DAMIZ AUTO CARE</span>
-          <span>QUALITY BODY WORK</span>
-          <span>BEST IN OHIO</span>
+          <span>QUALITY REPAIRS</span>
+          <span>COLUMBUS OHIO</span>
         </motion.div>
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 text-center px-6">
-           <h2 className="text-4xl md:text-7xl font-display font-black tracking-tighter text-rich-black leading-none uppercase italic">GET YOUR CAR BACK ON THE ROAD.</h2>
+           <h2 className="text-4xl md:text-7xl font-display font-black tracking-tighter text-rich-black leading-none uppercase italic">WE FIX CARS THE RIGHT WAY.</h2>
            <a 
-             href="#contact" 
-             onClick={(e) => scrollToSection(e, 'contact')}
+             href="tel:+13802237472" 
              className="px-16 py-7 bg-rich-black text-gold font-black uppercase text-xs tracking-[0.3em] hover:bg-white hover:text-rich-black transition-all duration-700 shadow-3xl"
            >
-             Get A Free Quote
+             Call For An Estimate
            </a>
         </div>
       </section>
@@ -565,7 +311,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             <div>
                <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase">GET IN TOUCH <br /> <span className="text-gold">FOR AN ESTIMATE.</span></h2>
-               <div className="space-y-12 font-black uppercase text-[11px] tracking-[0.3em]">
+                <div className="space-y-12 font-black uppercase text-[11px] tracking-[0.3em]">
                   <div className="flex gap-8 items-center group cursor-pointer">
                     <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MapPin size={24} /></div>
                     <div><div className="text-white/60 mb-1">HQ Workshop</div><div className="text-white text-sm">Ohio, United States</div></div>
@@ -577,6 +323,10 @@ export default function HomePage() {
                   <div className="flex gap-8 items-center group cursor-pointer">
                     <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MessageCircle size={24} /></div>
                     <div><div className="text-white/60 mb-1">WhatsApp</div><a href="https://wa.me/13802237472" target="_blank" className="text-gold text-sm underline decoration-gold/20 hover:decoration-gold transition-all italic">Launch Chat</a></div>
+                  </div>
+                  <div className="flex gap-12 pt-4 border-t border-white/5">
+                    <a href="https://www.facebook.com/olaniyi.awe.125" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2"><Facebook size={18} /> FB</a>
+                    <a href="https://www.instagram.com/damiz68" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2"><Instagram size={18} /> IG</a>
                   </div>
                </div>
             </div>
@@ -594,12 +344,12 @@ export default function HomePage() {
                   <AnimatedInput label="Phone Number" placeholder="+1..." />
                 </div>
                 <AnimatedInput 
-                  label="Service Interest" 
+                  label="What service do you need?" 
                   type="select" 
-                  options={['Major Collision Repair', 'Custom Paint Work', 'Paintless Dent Repair', 'Computer Diagnostics', 'Full Detailing', 'Car Shipping & Export']} 
+                  options={['Accident & Collision Repair', 'Professional Paint Work', 'Paintless Dent Removal', 'Advanced Computer Scans', 'Premium Detailing', 'Vehicle Transport & Export']} 
                 />
-                <AnimatedInput label="Vehicle & Requirements" type="textarea" placeholder="Tell us about the project..." />
-                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white hover:scale-[1.02] transition-all duration-700 mt-6 shadow-2xl active:scale-95">Get My Free Estimate</button>
+                <AnimatedInput label="Vehicle Detail & Description" type="textarea" placeholder="Ex: 2022 Toyota Lexus - Needs front bumper repair..." />
+                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white transition-all duration-700 mt-6 shadow-2xl active:scale-95">Send My Estimate Request</button>
               </div>
             </motion.div>
           </div>
@@ -612,7 +362,7 @@ export default function HomePage() {
            <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
               <div className="space-y-4">
                  <div className="text-3xl font-display font-black text-gold tracking-tighter">DAMIZ</div>
-                 <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm">Over a decade of experience in quality auto body and collision repair.</p>
+                 <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm">Local experts in Columbus, Ohio specializing in high-quality body work and collision repair since 2014.</p>
               </div>
               <div className="flex flex-wrap justify-center gap-10">
                 {['Terms', 'Privacy', 'Services', 'Gallery', 'About', 'Contact'].map(l => (
@@ -625,9 +375,10 @@ export default function HomePage() {
               <div className="text-[9px] font-black tracking-[1em] text-white/60 uppercase">
                 &copy; {new Date().getFullYear()} Damiz Auto Care Specialists
               </div>
-              <div className="flex gap-6">
-                 <a href="#" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Phone size={16} /></a>
-                 <a href="#" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Mail size={16} /></a>
+              <div className="flex gap-4">
+                 <a href="https://www.facebook.com/olaniyi.awe.125" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Facebook size={16} /></a>
+                 <a href="https://www.instagram.com/damiz68" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-gold hover:text-gold transition-all duration-500"><Instagram size={16} /></a>
+                 <a href="https://wa.me/13802237472" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/5 flex items-center justify-center rounded-full hover:border-[#25D366] hover:text-[#25D366] transition-all duration-500"><MessageCircle size={16} /></a>
               </div>
            </div>
         </div>
