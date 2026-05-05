@@ -1,8 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 import { 
   Car, 
   PaintRoller, 
@@ -21,7 +28,6 @@ import {
 
 import { CountUp } from '@/components/CountUp';
 import { TiltGalleryItem } from '@/components/TiltGalleryItem';
-import { AnimatedInput } from '@/components/AnimatedInput';
 import { Preloader } from '@/components/Preloader';
 import { Navbar } from '@/components/Navbar';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -30,11 +36,70 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
+  const heroTextRef = useRef<HTMLHeadingElement>(null);
+  const aboutImageRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const sectionTitleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    // Reveal animations for section titles
+    sectionTitleRefs.current.forEach((title) => {
+      if (title) {
+        gsap.fromTo(title, 
+          { opacity: 0, y: 100, skewY: 5 },
+          {
+            opacity: 1, 
+            y: 0, 
+            skewY: 0, 
+            duration: 1.5, 
+            ease: "power4.out",
+            scrollTrigger: {
+              trigger: title,
+              start: "top 85%",
+              toggleActions: "play none none none"
+            }
+          }
+        );
+      }
+    });
+
+    // Parallax for About image
+    if (aboutImageRef.current) {
+      gsap.to(aboutImageRef.current.querySelector('img'), {
+        y: -100,
+        ease: "none",
+        scrollTrigger: {
+          trigger: aboutImageRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+    }
+
+    // Hero parallax background
+    gsap.to(".hero-bg", {
+      y: 200,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#home",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, [isLoading]);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -49,6 +114,7 @@ export default function HomePage() {
     }
   };
 
+
   return (
     <div className="relative bg-rich-black">
       <AnimatePresence>
@@ -61,13 +127,15 @@ export default function HomePage() {
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-           <Image 
-             src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop" 
-             alt="Professional Auto Body Workshop Background" 
-             fill 
-             className="object-cover opacity-30 grayscale"
-             priority
-           />
+           <div className="hero-bg absolute inset-0 -top-20">
+             <Image 
+               src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop" 
+               alt="Professional Auto Body Workshop Background" 
+               fill 
+               className="object-cover opacity-30 grayscale scale-110"
+               priority
+             />
+           </div>
            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-rich-black/50 to-rich-black" />
         </div>
 
@@ -101,7 +169,7 @@ export default function HomePage() {
                 onClick={(e) => scrollToSection(e, 'contact')}
                 className="group px-12 py-6 bg-gold text-rich-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 hover:bg-white transition-all shadow-2xl"
               >
-                Get Free Estimate
+                Contact Us
                 <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-500" />
               </a>
               <a 
@@ -142,7 +210,12 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="text-center mb-32">
             <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Our Work</motion.span>
-            <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-none italic text-white">OUR SERVICES</h2>
+            <h2 
+              ref={(el) => { sectionTitleRefs.current[0] = el }}
+              className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-none italic text-white"
+            >
+              OUR SERVICES
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -150,7 +223,7 @@ export default function HomePage() {
               { icon: Car, title: 'Collision Repair', img: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2000&auto=format&fit=crop', desc: 'From major accidents to fender benders, we restore your car frame and body to safety standards.' },
               { icon: PaintRoller, title: 'Factory-Grade Paint', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop', desc: 'Using computerized color matching to get that standard factory finish back on your vehicle.' },
               { icon: Wrench, title: 'Paintless Dent Removal', img: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=2000&auto=format&fit=crop', desc: 'We fix dings and dents without needing a full repaint, saving you time and protecting your car original paint.' },
-              { icon: Stethoscope, title: 'Advanced Diagnostics', img: 'https://images.unsplash.com/photo-1593121925328-369ec34b1577?q=80&w=2000&auto=format&fit=crop', desc: 'We use the latest scans to find engine, electrical, and sensor issues quickly and accurately.' },
+              { icon: Stethoscope, title: 'Advanced Diagnostics', img: 'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?q=80&w=2000&auto=format&fit=crop', desc: 'We use the latest scans to find engine, electrical, and sensor issues quickly and accurately.' },
               { icon: Ship, title: 'Car Export Services', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop', desc: 'Shipping your car out of state or overseas? We handle the logistics and all the paperwork for you.' },
               { icon: Sparkle, title: 'Full Detailing', img: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop', desc: 'Deep interior cleaning, paint polishing, and ceramic coatings to keep your ride looking sharp.' },
             ].map((s, i) => (
@@ -200,7 +273,12 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-10">
              <div className="max-w-2xl">
                <span className="text-gold font-bold uppercase tracking-[0.5em] text-[10px] mb-4 block italic">Our Projects</span>
-               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter italic text-white leading-none">RECENT WORK.</h2>
+               <h2 
+                ref={(el) => { sectionTitleRefs.current[1] = el }}
+                className="text-5xl md:text-8xl font-display font-black tracking-tighter italic text-white leading-none"
+               >
+                 RECENT WORK.
+               </h2>
              </div>
              <p className="text-white/60 text-[10px] font-black tracking-[0.5em] uppercase border-l border-white/10 pl-8">Quality you can see for yourself</p>
           </div>
@@ -259,16 +337,17 @@ export default function HomePage() {
             whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }} 
             transition={{ duration: 1.5 }} 
             viewport={{ once: true }} 
+            ref={aboutImageRef}
             className="relative aspect-[4/5] rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(196,167,71,0.05)]"
           >
              <Image 
                src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=2000&auto=format&fit=crop" 
                alt="Expert At Work" 
                fill 
-               className="object-cover grayscale hover:grayscale-0 transition-all duration-2000" 
+               className="object-cover grayscale hover:grayscale-0 transition-all duration-[2s] scale-110" 
              />
              <div className="absolute inset-0 bg-gradient-to-t from-rich-black/80 via-transparent to-transparent" />
-             <div className="absolute bottom-12 left-12 right-12 p-8 glass rounded-3xl border border-white/10">
+             <div className="absolute bottom-12 left-12 right-12 p-8 glass rounded-3xl border border-white/10 z-10">
                 <div className="flex items-center gap-6">
                   <div className="text-6xl font-display font-black text-gold">10+</div>
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 leading-tight italic">
@@ -308,50 +387,32 @@ export default function HomePage() {
       {/* Contact Section */}
       <section id="contact" className="py-40">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
-            <div>
-               <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase">GET IN TOUCH <br /> <span className="text-gold">FOR AN ESTIMATE.</span></h2>
-                <div className="space-y-12 font-black uppercase text-[11px] tracking-[0.3em]">
-                  <div className="flex gap-8 items-center group cursor-pointer">
-                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MapPin size={24} /></div>
-                    <div><div className="text-white/60 mb-1">HQ Workshop</div><div className="text-white text-sm">Ohio, United States</div></div>
-                  </div>
-                  <div className="flex gap-8 items-center group cursor-pointer">
-                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><Phone size={24} /></div>
-                    <div><div className="text-white/60 mb-1">Direct Line</div><div className="text-white text-sm">(380) 223-7472</div></div>
-                  </div>
-                  <div className="flex gap-8 items-center group cursor-pointer">
-                    <div className="w-16 h-16 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl"><MessageCircle size={24} /></div>
-                    <div><div className="text-white/60 mb-1">WhatsApp</div><a href="https://wa.me/13802237472" target="_blank" className="text-gold text-sm underline decoration-gold/20 hover:decoration-gold transition-all italic">Launch Chat</a></div>
-                  </div>
-                  <div className="flex gap-12 pt-4 border-t border-white/5">
-                    <a href="https://www.facebook.com/olaniyi.awe.125" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2"><Facebook size={18} /> FB</a>
-                    <a href="https://www.instagram.com/damiz68" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2"><Instagram size={18} /> IG</a>
-                  </div>
-               </div>
-            </div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }} 
-              whileInView={{ opacity: 1, y: 0 }} 
-              viewport={{ once: true }}
-              className="bg-white/[0.03] p-12 md:p-16 rounded-[3.5rem] border border-white/5 relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[120px] pointer-events-none" />
-              <div className="relative z-10 space-y-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <AnimatedInput label="Your Name" placeholder="Ex: Alex Johnson" />
-                  <AnimatedInput label="Phone Number" placeholder="+1..." />
+          <div className="max-w-4xl mx-auto">
+             <h2 
+              ref={(el) => { sectionTitleRefs.current[2] = el }}
+              className="text-5xl md:text-8xl font-display font-black tracking-tighter mb-16 italic text-white uppercase text-center md:text-left"
+             >
+                GET IN TOUCH <br /> <span className="text-gold">FOR AN ESTIMATE.</span>
+             </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 font-black uppercase text-[11px] tracking-[0.3em]">
+                <div className="flex gap-6 items-center group cursor-pointer border border-white/5 p-8 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] transition-all">
+                  <div className="w-14 h-14 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl shrink-0"><MapPin size={22} /></div>
+                  <div><div className="text-white/40 mb-1">HQ Workshop</div><div className="text-white text-sm">Ohio, United States</div></div>
                 </div>
-                <AnimatedInput 
-                  label="What service do you need?" 
-                  type="select" 
-                  options={['Accident & Collision Repair', 'Professional Paint Work', 'Paintless Dent Removal', 'Advanced Computer Scans', 'Premium Detailing', 'Vehicle Transport & Export']} 
-                />
-                <AnimatedInput label="Vehicle Detail & Description" type="textarea" placeholder="Ex: 2022 Toyota Lexus - Needs front bumper repair..." />
-                <button className="w-full py-8 bg-gold text-rich-black font-black uppercase text-xs tracking-[0.4em] hover:bg-white transition-all duration-700 mt-6 shadow-2xl active:scale-95">Send My Estimate Request</button>
-              </div>
-            </motion.div>
+                <div className="flex gap-6 items-center group cursor-pointer border border-white/5 p-8 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] transition-all">
+                  <div className="w-14 h-14 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl shrink-0"><Phone size={22} /></div>
+                  <div><div className="text-white/40 mb-1">Direct Line</div><div className="text-white text-sm">(380) 223-7472</div></div>
+                </div>
+                <div className="flex gap-6 items-center group cursor-pointer border border-white/5 p-8 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] transition-all">
+                  <div className="w-14 h-14 glass flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-rich-black transition-all duration-700 rounded-2xl shrink-0"><MessageCircle size={22} /></div>
+                  <div><div className="text-white/40 mb-1">WhatsApp</div><a href="https://wa.me/13802237472" target="_blank" className="text-gold text-sm underline decoration-gold/20 hover:decoration-gold transition-all italic">Launch Chat</a></div>
+                </div>
+             </div>
+             
+             <div className="flex justify-center gap-12 pt-16 mt-16 border-t border-white/5 uppercase font-black text-[11px] tracking-[0.4em]">
+                <a href="https://www.facebook.com/olaniyi.awe.125" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2 underline decoration-white/5 hover:decoration-gold">Facebook</a>
+                <a href="https://www.instagram.com/damiz68" target="_blank" className="text-white/40 hover:text-gold transition-colors flex items-center gap-2 underline decoration-white/5 hover:decoration-gold">Instagram</a>
+             </div>
           </div>
         </div>
       </section>
